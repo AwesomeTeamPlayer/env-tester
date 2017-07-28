@@ -1,0 +1,7 @@
+.gitignore
+.idea/dbnavigator.xml
+.idea/env-tester.iml
+.idea/modules.xml
+.idea/workspace.xml
+services/
+.idea/inspectionProfiles/
