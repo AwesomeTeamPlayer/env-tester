@@ -2,6 +2,29 @@ version: '2'
 
 services:
 
+  tester-php:
+    build: ./tester/
+    links:
+      - projects-service-nginx
+      - projects-service-mysql
+      - projects-service-rabbitmq
+    volumes:
+      - ./tester/:/app
+    environment:
+      PROJECTS_SERVICE_RABBIT_HOST: 'projects-service-rabbitmq'
+      PROJECTS_SERVICE_RABBIT_PORT: '5672'
+      PROJECTS_SERVICE_RABBIT_LOGIN: 'guest'
+      PROJECTS_SERVICE_RABBIT_PASSWORD: 'guest'
+      PROJECTS_SERVICE_RABBIT_CHANNEL: 'events'
+
+      PROJECTS_SERVICE_MYSQL_HOST: 'projects-service-mysql'
+      PROJECTS_SERVICE_MYSQL_PORT: '3306'
+      PROJECTS_SERVICE_MYSQL_LOGIN: 'root'
+      PROJECTS_SERVICE_MYSQL_PASSWORD: ''
+      PROJECTS_SERVICE_MYSQL_DATABASE: 'testdb'
+    networks:
+      - code-network
+
   projects-service-nginx:
     image: nginx:1.11
     ports:
