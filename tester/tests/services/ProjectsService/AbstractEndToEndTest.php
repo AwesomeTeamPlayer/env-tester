@@ -3,6 +3,7 @@
 namespace services\ProjectsService;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 use mysqli;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PHPUnit\Framework\TestCase;
@@ -73,15 +74,15 @@ abstract class AbstractEndToEndTest extends TestCase
 		} while ($message !== null);
 	}
 
-	protected function makeRequest($method, $path, $bodyJson = []) : string
+	protected function makeRequest($method, $path, $bodyContent = '') : string
 	{
 		$url = 'http://projects-service-nginx';
 
 		$client = new Client();
-		$res = $client->request($method, $url . $path, [
-			'json' => $bodyJson
-		]);
+		$response = $client->send(
+			new Request($method, $url . $path, [], $bodyContent)
+		);
 
-		return (string) $res->getBody();
+		return (string) $response->getBody();
 	}
 }
