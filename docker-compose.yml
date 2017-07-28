@@ -30,7 +30,7 @@ services:
       RABBIT_PASSWORD: 'guest'
       RABBIT_CHANNEL: 'events'
 
-      MYSQL_HOST: 'projects-service-mysql-4'
+      MYSQL_HOST: 'projects-service-mysql'
       MYSQL_PORT: '3306'
       MYSQL_LOGIN: 'root'
       MYSQL_PASSWORD: ''
@@ -41,7 +41,7 @@ services:
   projects-service-installer:
     build: ./services/ProjectsService
     links:
-      - projects-service-mysql-4
+      - projects-service-mysql
       - projects-service-rabbitmq
     volumes:
       - ./services/ProjectsService/:/app
@@ -53,7 +53,7 @@ services:
       RABBIT_PASSWORD: 'guest'
       RABBIT_CHANNEL: 'events'
 
-      MYSQL_HOST: 'projects-service-mysql-4'
+      MYSQL_HOST: 'projects-service-mysql'
       MYSQL_PORT: '3306'
       MYSQL_LOGIN: 'root'
       MYSQL_PASSWORD: ''
@@ -62,7 +62,7 @@ services:
       - code-network
     command: "php /app/install.php"
 
-  projects-service-mysql-4:
+  projects-service-mysql:
     image: mysql:8.0.1
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
