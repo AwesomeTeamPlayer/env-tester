@@ -1,4 +1,5 @@
 <?php
+
 namespace services\ProjectsService;
 
 class CreateProjectsUsersPairsEndpointTest extends AbstractEndToEndTest
