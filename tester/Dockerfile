@@ -4,7 +4,7 @@ ADD . /app
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends git zip
+    apt-get install -y --no-install-recommends git zip unzip
 
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-install mysqli
