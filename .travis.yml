@@ -1,0 +1,10 @@
+sudo: required
+
+services:
+  - docker
+
+install:
+  - ./prepareEnv.sh
+  - docker-compose up
+
+script: docker exec envtester_tester-php_1 /app/runTests.sh
