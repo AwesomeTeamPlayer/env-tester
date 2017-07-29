@@ -13,7 +13,7 @@ $username = $argv[3];
 $password = $argv[4];
 $database = $argv[5];
 
-function isMySqlConnected($host, $port, $username, $password, $database)
+function isMySqlReady($host, $port, $username, $password, $database)
 {
 	$mysqli = @(new mysqli($host, $username, $password, $database, $port));
 
@@ -42,7 +42,7 @@ function isMySqlConnected($host, $port, $username, $password, $database)
 }
 
 if (
-    isMySqlConnected(
+    isMySqlReady(
         getenv('PROJECTS_SERVICE_MYSQL_HOST'),
         getenv('PROJECTS_SERVICE_MYSQL_PORT'),
         getenv('PROJECTS_SERVICE_MYSQL_LOGIN'),
