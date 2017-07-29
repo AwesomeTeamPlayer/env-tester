@@ -7,4 +7,5 @@ install:
   - ./prepareEnv.sh
   - docker-compose up
 
-script: docker exec envtester_tester-php_1 /app/runTests.sh
+#script: docker exec envtester_tester-php_1 /app/runTests.sh
+script: docker ps
