@@ -9,6 +9,7 @@ cd services/
 
 git clone https://github.com/AwesomeTeamPlayer/ProjectsService.git
 cd ./ProjectsService
+rm ./.travis.yml
 composer install
 mkdir ./var/
 chmod a+rwx ./var
