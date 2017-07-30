@@ -11,4 +11,9 @@ class DefaultEndpointTest extends AbstractEndToEndTest
 			$this->makeRequest('GET', '/')
 		);
 	}
+
+	public function test_failed()
+	{
+		$this->assertTrue(false);
+	}
 }
