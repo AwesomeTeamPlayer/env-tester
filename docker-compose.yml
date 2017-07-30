@@ -32,7 +32,7 @@ services:
     volumes:
       - ./services/ProjectsService/:/app
       - ./services/ProjectsService/var/log:/var/log
-      - ./ProjectsService.conf:/etc/nginx/conf.d/default.conf
+      - ./services-configx/ProjectsService.conf:/etc/nginx/conf.d/default.conf
     links:
       - projects-service-php
     networks:
