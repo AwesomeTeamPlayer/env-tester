@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+mkdir services
 cd services/
 #
 #git clone https://github.com/AwesomeTeamPlayer/auth-service.git
