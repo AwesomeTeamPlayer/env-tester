@@ -1,6 +1,6 @@
 <?php
 
-namespace services\ProjectsService;
+namespace services\AuthService;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
@@ -39,11 +39,11 @@ abstract class AbstractEndToEndTest extends TestCase
 	public function setUp()
 	{
 		$this->mysqli = new mysqli(
-			getenv('PROJECTS_SERVICE_MYSQL_HOST'),
-			getenv('PROJECTS_SERVICE_MYSQL_LOGIN'),
-			getenv('PROJECTS_SERVICE_MYSQL_PASSWORD'),
-			getenv('PROJECTS_SERVICE_MYSQL_DATABASE'),
-			getenv('PROJECTS_SERVICE_MYSQL_PORT')
+			getenv('AUTH_SERVICE_MYSQL_HOST'),
+			getenv('AUTH_SERVICE_MYSQL_LOGIN'),
+			getenv('AUTH_SERVICE_MYSQL_PASSWORD'),
+			getenv('AUTH_SERVICE_MYSQL_DATABASE'),
+			getenv('AUTH_SERVICE_MYSQL_PORT')
 		);
 
 		$this->connection = new AMQPStreamConnection(
@@ -58,7 +58,7 @@ abstract class AbstractEndToEndTest extends TestCase
 
 	public function tearDown()
 	{
-		$this->mysqli->query('TRUNCATE TABLE projects_users;');
+		$this->mysqli->query('TRUNCATE TABLE login_password;');
 		$this->mysqli->close();
 
 		sleep(1);
@@ -76,7 +76,7 @@ abstract class AbstractEndToEndTest extends TestCase
 
 	protected function makeRequest($method, $path, $bodyContent = '') : string
 	{
-		$url = 'http://projects-service-nginx';
+		$url = 'http://auth-service-nginx';
 
 		$client = new Client();
 		$response = $client->send(

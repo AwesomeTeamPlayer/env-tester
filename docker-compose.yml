@@ -5,25 +5,101 @@ services:
   tester-php:
     build: ./tester/
     links:
+      - auth-service-nginx
       - projects-service-nginx
       - projects-service-mysql
-      - projects-service-rabbitmq
+      - events-rabbitmq
     volumes:
       - ./tester/:/app
     environment:
-      PROJECTS_SERVICE_RABBIT_HOST: 'projects-service-rabbitmq'
-      PROJECTS_SERVICE_RABBIT_PORT: '5672'
-      PROJECTS_SERVICE_RABBIT_LOGIN: 'guest'
-      PROJECTS_SERVICE_RABBIT_PASSWORD: 'guest'
-      PROJECTS_SERVICE_RABBIT_CHANNEL: 'events'
+      RABBIT_HOST: 'events-rabbitmq'
+      RABBIT_PORT: '5672'
+      RABBIT_LOGIN: 'guest'
+      RABBIT_PASSWORD: 'guest'
+      RABBIT_CHANNEL: 'events'
 
       PROJECTS_SERVICE_MYSQL_HOST: 'projects-service-mysql'
       PROJECTS_SERVICE_MYSQL_PORT: '3306'
       PROJECTS_SERVICE_MYSQL_LOGIN: 'root'
       PROJECTS_SERVICE_MYSQL_PASSWORD: ''
       PROJECTS_SERVICE_MYSQL_DATABASE: 'testdb'
+
+      AUTH_SERVICE_MYSQL_HOST: 'auth-service-mysql'
+      AUTH_SERVICE_MYSQL_PORT: '3306'
+      AUTH_SERVICE_MYSQL_LOGIN: 'root'
+      AUTH_SERVICE_MYSQL_PASSWORD: ''
+      AUTH_SERVICE_MYSQL_DATABASE: 'testdb'
     networks:
       - code-network
+
+  auth-service-nginx:
+    image: nginx:1.11
+    ports:
+      - "8002:80"
+    volumes:
+      - ./services/auth-service/:/app
+      - ./services/auth-service/var/log:/var/log
+      - ./services-configs/AuthService.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - auth-service-php
+    networks:
+      - code-network
+
+  auth-service-php:
+    build: ./services/auth-service
+    links:
+      - auth-service-mysql
+      - events-rabbitmq
+    volumes:
+      - ./services/auth-service/:/app
+      - ./services/auth-service/var/log:/var/log/php
+    environment:
+      RABBIT_HOST: 'events-rabbitmq'
+      RABBIT_PORT: '5672'
+      RABBIT_LOGIN: 'guest'
+      RABBIT_PASSWORD: 'guest'
+      RABBIT_CHANNEL: 'events'
+
+      MYSQL_HOST: 'auth-service-mysql'
+      MYSQL_PORT: '3306'
+      MYSQL_LOGIN: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: 'testdb'
+    networks:
+      - code-network
+
+  auth-service-installer:
+    build: ./services/auth-service
+    links:
+      - auth-service-mysql
+      - events-rabbitmq
+    volumes:
+      - ./services/auth-service/:/app
+      - ./services/auth-service/var/log:/var/log/php
+    environment:
+      RABBIT_HOST: 'events-rabbitmq'
+      RABBIT_PORT: '5672'
+      RABBIT_LOGIN: 'guest'
+      RABBIT_PASSWORD: 'guest'
+      RABBIT_CHANNEL: 'events'
+
+      MYSQL_HOST: 'auth-service-mysql'
+      MYSQL_PORT: '3306'
+      MYSQL_LOGIN: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: 'testdb'
+    networks:
+      - code-network
+    command: "php /app/install.php"
+
+  auth-service-mysql:
+    image: mysql:8.0.1
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: testdb
+    networks:
+      - code-network
+
 
   projects-service-nginx:
     image: nginx:1.11
@@ -42,12 +118,12 @@ services:
     build: ./services/ProjectsService
     links:
       - projects-service-mysql
-      - projects-service-rabbitmq
+      - events-rabbitmq
     volumes:
       - ./services/ProjectsService/:/app
       - ./services/ProjectsService/var/log:/var/log/php
     environment:
-      RABBIT_HOST: 'projects-service-rabbitmq'
+      RABBIT_HOST: 'events-rabbitmq'
       RABBIT_PORT: '5672'
       RABBIT_LOGIN: 'guest'
       RABBIT_PASSWORD: 'guest'
@@ -65,12 +141,12 @@ services:
     build: ./services/ProjectsService
     links:
       - projects-service-mysql
-      - projects-service-rabbitmq
+      - events-rabbitmq
     volumes:
       - ./services/ProjectsService/:/app
       - ./services/ProjectsService/var/log:/var/log/php
     environment:
-      RABBIT_HOST: 'projects-service-rabbitmq'
+      RABBIT_HOST: 'events-rabbitmq'
       RABBIT_PORT: '5672'
       RABBIT_LOGIN: 'guest'
       RABBIT_PASSWORD: 'guest'
@@ -93,7 +169,7 @@ services:
     networks:
       - code-network
 
-  projects-service-rabbitmq:
+  events-rabbitmq:
     image: rabbitmq:3.6.10
     networks:
       - code-network

@@ -18,4 +18,4 @@ done
 echo ""
 echo ""
 
-/app/vendor/bin/phpunit /app/tests
+/app/vendor/bin/phpunit /app/tests/services
