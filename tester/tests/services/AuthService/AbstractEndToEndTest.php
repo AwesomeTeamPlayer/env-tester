@@ -59,6 +59,7 @@ abstract class AbstractEndToEndTest extends TestCase
 	public function tearDown()
 	{
 		$this->mysqli->query('TRUNCATE TABLE login_password;');
+		$this->mysqli->query('TRUNCATE TABLE login_session;');
 		$this->mysqli->close();
 
 		sleep(1);
