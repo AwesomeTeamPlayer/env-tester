@@ -68,8 +68,31 @@ class UpdatePairEndpointTest extends AbstractEndToEndTest
 		);
 
 		$this->assertEquals(
+			'{"hasLogin":true}',
+			$this->makeRequest('POST', '/has-login', '{"login":"login"}')
+		);
+
+		$response = json_decode($this->makeRequest('POST', '/login', '{"login":"login", "password":"password"}'), true);
+		$this->assertEquals('success', $response['status']);
+		$this->assertTrue(strlen($response['sessionId']) > 10);
+
+		$this->assertEquals(
 			'{"status":"success"}',
 			$this->makeRequest('POST', '/pair', '{"login":"login", "password":"password123"}')
+		);
+
+		$this->assertEquals(
+			'{"status":"failed","password":[{"codeId":103,"text":"Given password is incorrect"}]}',
+			$this->makeRequest('POST', '/login', '{"login":"login", "password":"password"}')
+		);
+
+		$response = json_decode($this->makeRequest('POST', '/login', '{"login":"login", "password":"password123"}'), true);
+		$this->assertEquals('success', $response['status']);
+		$this->assertTrue(strlen($response['sessionId']) > 10);
+
+		$this->assertEquals(
+			'{"hasLogin":true}',
+			$this->makeRequest('POST', '/has-login', '{"login":"login"}')
 		);
 	}
 }

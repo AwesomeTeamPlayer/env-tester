@@ -58,6 +58,11 @@ class CreatePairEndpointTest extends AbstractEndToEndTest
 			'{"status":"success"}',
 			$this->makeRequest('PUT', '/pair', '{"login":"login", "password":"password"}')
 		);
+
+		$this->assertEquals(
+			'{"hasLogin":true}',
+			$this->makeRequest('POST', '/has-login', '{"login":"login"}')
+		);
 	}
 
 	public function test_create_pair_endpoint_double_requests()
@@ -68,8 +73,18 @@ class CreatePairEndpointTest extends AbstractEndToEndTest
 		);
 
 		$this->assertEquals(
+			'{"hasLogin":true}',
+			$this->makeRequest('POST', '/has-login', '{"login":"login"}')
+		);
+
+		$this->assertEquals(
 			'{"status":"failed","login":[{"codeId":100,"text":"Given Login already exists in the database"}]}',
 			$this->makeRequest('PUT', '/pair', '{"login":"login", "password":"password"}')
+		);
+
+		$this->assertEquals(
+			'{"hasLogin":true}',
+			$this->makeRequest('POST', '/has-login', '{"login":"login"}')
 		);
 	}
 }
