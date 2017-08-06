@@ -86,4 +86,26 @@ abstract class AbstractEndToEndTest extends TestCase
 
 		return (string) $response->getBody();
 	}
+
+	/**
+	 * @return string[][]
+	 */
+	protected function getAllStorageEvents()
+	{
+		sleep(1);
+
+		$messages = [];
+
+		while (true) {
+			$message = $this->channel->basic_get(self::QUEUE_NAME, true);
+
+			if ($message === null) {
+				break;
+			}
+
+			$messages[] = json_decode($message->getBody(), true);
+		}
+
+		return $messages;
+	}
 }

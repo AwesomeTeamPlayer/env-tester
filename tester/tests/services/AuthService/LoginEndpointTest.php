@@ -101,5 +101,23 @@ class LoginEndpointTest extends AbstractEndToEndTest
 		$response = json_decode($this->makeRequest('POST', '/login', '{"login":"login", "password":"password"}'), true);
 		$this->assertEquals('success', $response['status']);
 		$this->assertTrue(strlen($response['sessionId']) > 10);
+
+		$events = $this->getAllStorageEvents();
+		$this->assertCount(1, $events);
+
+		$event = $events[0];
+
+		unset($event['occuredAt']);
+		unset($event['data']['sessionId']);
+
+		$this->assertEquals(
+			[
+				'name' => 'LoggedUser',
+				'data' => [
+					'login' => 'login',
+				]
+			],
+			$event
+		);
 	}
 }
