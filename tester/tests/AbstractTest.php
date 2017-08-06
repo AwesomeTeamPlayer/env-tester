@@ -50,7 +50,7 @@ abstract class AbstractTest extends TestCase
 		$messages = [];
 
 		while (true) {
-			$message = $this->channel->basic_get($this->getQueueName(), true);
+			$message = $this->channel->basic_get(self::EVENTS_QUEUE_NAME, true);
 
 			if ($message === null) {
 				break;
@@ -68,7 +68,7 @@ abstract class AbstractTest extends TestCase
 	protected function clearQueue()
 	{
 		do {
-			$message = $this->channel->basic_get($this->getQueueName(), true);
+			$message = $this->channel->basic_get(self::EVENTS_QUEUE_NAME, true);
 		} while ($message !== null);
 	}
 }
