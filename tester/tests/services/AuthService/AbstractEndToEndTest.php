@@ -2,14 +2,13 @@
 
 namespace services\AuthService;
 
+use AbstractTest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use mysqli;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PHPUnit\Framework\TestCase;
 use Slim\App;
 
-abstract class AbstractEndToEndTest extends TestCase
+abstract class AbstractEndToEndTest extends AbstractTest
 {
 	/**
 	 * @var string
@@ -22,19 +21,17 @@ abstract class AbstractEndToEndTest extends TestCase
 	protected $mysqli;
 
 	/**
-	 * @var AMQPStreamConnection
-	 */
-	protected $connection;
-
-	/**
-	 * @var AMQPChannel
-	 */
-	protected $channel;
-
-	/**
 	 * @var App
 	 */
 	protected $app;
+
+	/**
+	 * @return string
+	 */
+	protected function getQueueName() : string
+	{
+		return self::QUEUE_NAME;
+	}
 
 	public function setUp()
 	{
@@ -46,14 +43,7 @@ abstract class AbstractEndToEndTest extends TestCase
 			getenv('AUTH_SERVICE_MYSQL_PORT')
 		);
 
-		$this->connection = new AMQPStreamConnection(
-			getenv('RABBIT_HOST'),
-			getenv('RABBIT_PORT'),
-			getenv('RABBIT_LOGIN'),
-			getenv('RABBIT_PASSWORD')
-		);
-		$this->channel = $this->connection->channel();
-		$this->channel->queue_declare(self::QUEUE_NAME, false, false, false, false);
+		$this->setUpEventsQueue();
 	}
 
 	public function tearDown()
@@ -62,17 +52,7 @@ abstract class AbstractEndToEndTest extends TestCase
 		$this->mysqli->query('TRUNCATE TABLE login_session;');
 		$this->mysqli->close();
 
-		sleep(1);
-		$this->clearQueue();
-		$this->channel->close();
-		$this->connection->close();
-	}
-
-	private function clearQueue()
-	{
-		do {
-			$message = $this->channel->basic_get(self::QUEUE_NAME, true);
-		} while ($message !== null);
+		$this->tearDownEventsQueue();
 	}
 
 	protected function makeRequest($method, $path, $bodyContent = '') : string
@@ -87,25 +67,4 @@ abstract class AbstractEndToEndTest extends TestCase
 		return (string) $response->getBody();
 	}
 
-	/**
-	 * @return string[][]
-	 */
-	protected function getAllStorageEvents()
-	{
-		sleep(1);
-
-		$messages = [];
-
-		while (true) {
-			$message = $this->channel->basic_get(self::QUEUE_NAME, true);
-
-			if ($message === null) {
-				break;
-			}
-
-			$messages[] = json_decode($message->getBody(), true);
-		}
-
-		return $messages;
-	}
 }

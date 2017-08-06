@@ -2,14 +2,13 @@
 
 namespace services\ProjectsService;
 
+use AbstractTest;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request;
 use mysqli;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
-use PHPUnit\Framework\TestCase;
 use Slim\App;
 
-abstract class AbstractEndToEndTest extends TestCase
+abstract class AbstractEndToEndTest extends AbstractTest
 {
 	/**
 	 * @var string
@@ -20,16 +19,6 @@ abstract class AbstractEndToEndTest extends TestCase
 	 * @var mysqli
 	 */
 	protected $mysqli;
-
-	/**
-	 * @var AMQPStreamConnection
-	 */
-	protected $connection;
-
-	/**
-	 * @var AMQPChannel
-	 */
-	protected $channel;
 
 	/**
 	 * @var App
@@ -46,14 +35,7 @@ abstract class AbstractEndToEndTest extends TestCase
 			getenv('PROJECTS_SERVICE_MYSQL_PORT')
 		);
 
-		$this->connection = new AMQPStreamConnection(
-			getenv('RABBIT_HOST'),
-			getenv('RABBIT_PORT'),
-			getenv('RABBIT_LOGIN'),
-			getenv('RABBIT_PASSWORD')
-		);
-		$this->channel = $this->connection->channel();
-		$this->channel->queue_declare(self::QUEUE_NAME, false, false, false, false);
+		$this->setUpEventsQueue();
 	}
 
 	public function tearDown()
@@ -61,17 +43,7 @@ abstract class AbstractEndToEndTest extends TestCase
 		$this->mysqli->query('TRUNCATE TABLE projects_users;');
 		$this->mysqli->close();
 
-		sleep(1);
-		$this->clearQueue();
-		$this->channel->close();
-		$this->connection->close();
-	}
-
-	private function clearQueue()
-	{
-		do {
-			$message = $this->channel->basic_get(self::QUEUE_NAME, true);
-		} while ($message !== null);
+		$this->tearDownEventsQueue();
 	}
 
 	protected function makeRequest($method, $path, $bodyContent = '') : string
