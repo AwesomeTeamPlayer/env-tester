@@ -29,6 +29,12 @@ services:
       AUTH_SERVICE_MYSQL_LOGIN: 'root'
       AUTH_SERVICE_MYSQL_PASSWORD: ''
       AUTH_SERVICE_MYSQL_DATABASE: 'testdb'
+
+      USERS_SERVICE_MYSQL_HOST: 'users-service-mysql'
+      USERS_SERVICE_MYSQL_PORT: '3306'
+      USERS_SERVICE_MYSQL_LOGIN: 'root'
+      USERS_SERVICE_MYSQL_PASSWORD: ''
+      USERS_SERVICE_MYSQL_DATABASE: 'testdb'
     networks:
       - code-network
 
@@ -168,6 +174,80 @@ services:
       MYSQL_DATABASE: testdb
     networks:
       - code-network
+
+
+  users-service-nginx:
+    image: nginx:1.11
+    ports:
+      - "8003:80"
+    volumes:
+      - ./services/users-service/:/app
+      - ./services/users-service/var/log:/var/log
+      - ./services-configs/users-service.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - users-service-php
+    networks:
+      - code-network
+
+  users-service-php:
+    build: ./services/users-service
+    links:
+      - users-service-mysql
+      - events-rabbitmq
+    volumes:
+      - ./services/users-service/:/app
+      - ./services/users-service/var/log:/var/log/php
+    environment:
+      RABBIT_HOST: 'events-rabbitmq'
+      RABBIT_PORT: '5672'
+      RABBIT_LOGIN: 'guest'
+      RABBIT_PASSWORD: 'guest'
+      RABBIT_CHANNEL: 'events'
+
+      MYSQL_HOST: 'users-service-mysql'
+      MYSQL_PORT: '3306'
+      MYSQL_LOGIN: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: 'testdb'
+
+      NAME_MIN_LENGTH: 3
+      NAME_MAX_LENGTH: 255
+    networks:
+      - code-network
+
+  users-service-installer:
+    build: ./services/users-service
+    links:
+      - users-service-mysql
+      - events-rabbitmq
+    volumes:
+      - ./services/users-service/:/app
+      - ./services/users-service/var/log:/var/log/php
+    environment:
+      RABBIT_HOST: 'events-rabbitmq'
+      RABBIT_PORT: '5672'
+      RABBIT_LOGIN: 'guest'
+      RABBIT_PASSWORD: 'guest'
+      RABBIT_CHANNEL: 'events'
+
+      MYSQL_HOST: 'users-service-mysql'
+      MYSQL_PORT: '3306'
+      MYSQL_LOGIN: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: 'testdb'
+    networks:
+      - code-network
+    command: "php /app/install.php"
+
+  users-service-mysql:
+    image: mysql:8.0.1
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: testdb
+    networks:
+      - code-network
+
+
 
   events-rabbitmq:
     image: rabbitmq:3.6.10
